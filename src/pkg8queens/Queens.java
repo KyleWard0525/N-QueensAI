@@ -26,6 +26,7 @@ public class Queens {
         init();
         initBoard();
         eval = new Fitness(board);
+        generateBoardStates();
     }
 
     /**
@@ -34,7 +35,7 @@ public class Queens {
     public void init() {
         this.n = 8;
         this.board = new int[n][n];
-        this.boardStates = new ArrayList<>();
+        this.boardStates = new ArrayList<>(16777216);
         this.rand = new Random();
     }
 
@@ -53,8 +54,10 @@ public class Queens {
 
             col++;
         }
+
         //Add board state to list
         boardStates.add(board);
+
     }
 
     /**
@@ -62,32 +65,49 @@ public class Queens {
      * other rows in that column
      */
     public void generateBoardStates() {
+        eval.findAllQueens();
         ArrayList<int[]> queensPos = Fitness.queenPositions;
+        int[][] newBoard = new int[8][8];
 
-        //Loop through all queens
-        for (int i = 0; i < queensPos.size(); i++) {
-            int[] queen = queensPos.get(i);
-            int nextPos = queen[0] + 1;
+        try {
 
-            //Reset if nextPos is off the board
-            if (nextPos >= board.length) {
-                nextPos = 0;
+            //Generate all possible board combinations
+            while (!boardStates.contains(newBoard)) {
+                //Loop through all queens
+                for (int i = 0; i < queensPos.size(); i++) {
+                    int[] queen = queensPos.get(i);
+                    for (int k = 0; k < board.length; k++) {
+                        //Pick random row in column to move to
+                        int nextPos = rand.nextInt(n);
+
+                        //Reset if nextPos is off the board
+                        if (nextPos >= board.length) {
+                            nextPos = 0;
+                        }
+
+                        //Move queen
+                        int orig_idx = queen[0];
+                        queen = new int[]{nextPos, queen[1]};
+                        queensPos.set(i, queen);
+
+                        //Change queen's pos on the board
+                        newBoard = board;
+                        newBoard[orig_idx][queen[1]] = 0;
+                        newBoard[nextPos][queen[1]] = 1;
+
+                        //Add new board state to list
+                        boardStates.add(newBoard);
+                    }
+                }
+
             }
-            
-            //Move queen
-            int orig_idx = queen[0];
-            queen = new int[]{nextPos, queen[1]};
-            queensPos.set(i, queen);
-            
-            //Change queen's pos on the board
-            board[orig_idx][queen[1]] = 0;
-            board[nextPos][queen[1]] = 1;
-            
-            //Add new board state to list
-            boardStates.add(board);
-            
+        } catch (Exception ie) {
+            ie.printStackTrace();
         }
-        
+    }
+
+    public void findLowestState() {
+
     }
 
     /**
@@ -97,14 +117,19 @@ public class Queens {
         System.out.println("Board State: ");
 
         for (int i = 0; i < n; i++) {
-            System.out.println(Arrays.toString(board[i]));
+            System.out.println(Arrays.toString(boardStates.get(0)[i]));
         }
 
-        System.out.println("\nState Error: " + eval.error());
-        
-        generateBoardStates();
-        
-        System.out.println("Number of generated states: " + boardStates.size());
+        System.out.println("State Error: " + eval.error(boardStates.get(0)));
+
+        System.out.println("\nNumber of generated states: " + boardStates.size());
+
+        System.out.println("\nBoard State #2:");
+
+        for (int i = 0; i < n; i++) {
+            System.out.println(Arrays.toString(boardStates.get(12)[i]));
+        }
+        System.out.println("State Error: " + eval.error(boardStates.get(12)));
 
     }
 }
