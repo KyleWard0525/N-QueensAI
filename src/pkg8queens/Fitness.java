@@ -15,7 +15,7 @@ import java.util.*;
  */
 public class Fitness {
     
-    private ArrayList<int[]> queenPositions; //Keeps track of where each queen is
+    public static ArrayList<int[]> queenPositions; //Keeps track of where each queen is
     private int[][] board;
     private int error;
     private int max;
@@ -90,6 +90,14 @@ public class Fitness {
             if(board[rowNum][i] == 1)
             {
                 collision = true;
+                
+                int[] queen = new int[]{rowNum, i};
+                
+                //Check if queen is in list. If not, add it
+                if(!queenPositions.contains(queen))
+                {
+                 queenPositions.add(queen);
+                }
             }
                 
         }
@@ -119,6 +127,14 @@ public class Fitness {
             if(board[i][colNum] == 1)
             {
                 collision = true;
+                
+                int[] queen = new int[]{colNum, i};
+                
+                //Check if queen is in list. If not, add it
+                if(!queenPositions.contains(queen))
+                {
+                 queenPositions.add(queen);
+                }
             }
         }
         return collision;
@@ -154,6 +170,12 @@ public class Fitness {
             if(currSpace == 1)
             {
                error++; 
+                
+                //Check if queen is in list. If not, add it
+                if(!queenPositions.contains(nextSpace))
+                {
+                 queenPositions.add(nextSpace);
+                }
             }
             
             x++;
@@ -181,6 +203,12 @@ public class Fitness {
             if(currSpace == 1)
             {
                error++; 
+               
+               //Check if queen is in list. If not, add it
+                if(!queenPositions.contains(nextSpace))
+                {
+                 queenPositions.add(nextSpace);
+                }
             }
             
             x++;
@@ -208,6 +236,12 @@ public class Fitness {
             if(currSpace == 1)
             {
                error++; 
+               
+               //Check if queen is in list. If not, add it
+                if(!queenPositions.contains(nextSpace))
+                {
+                 queenPositions.add(nextSpace);
+                }
             }
             
             x++;
@@ -235,35 +269,17 @@ public class Fitness {
             if(currSpace == 1)
             {
                error++; 
+               
+               //Check if queen is in list. If not, add it
+                if(!queenPositions.contains(nextSpace))
+                {
+                 queenPositions.add(nextSpace);
+                }
             }
             
             x++;
             y++;
         }
-    }
-    
-    /**
-     * Check if the current position is at an 
-     * edge of the board
-     * @param pos - current position on the board
-     * @return 
-     */
-    public boolean checkEdge(int[] pos)
-    {
-        boolean edge;
-        
-        if(pos[0] <= 0 || pos[0] >= 7)
-        {
-            edge = true;
-        }
-        else if(pos[1] <= 0 || pos[1] >= 7)
-        {
-            edge = true;
-        }
-        else {
-            edge = false;
-        }
-        return edge;
     }
     
     public void setBoard(int[][] b)
