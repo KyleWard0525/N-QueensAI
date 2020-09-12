@@ -74,5 +74,15 @@ public class Queens {
         
         System.out.println("\nState Error: " + eval.error());
         
+        System.out.println("\nQueen Positions: ");
+        System.out.println("-----------------");
+        
+        int qCount = 0;
+        
+        for(int[] queen : Fitness.queenPositions)
+        {
+            System.out.println("Queen #" + (++qCount) + " position: " + Arrays.toString(queen));
+        }
+        
     }
 }
