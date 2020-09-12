@@ -28,12 +28,7 @@ public class Fitness {
         this.max = Queens.n-1;
     }
     
-    /**
-     * Evaluates the state of the board and
-     * counts the number of errors.
-     * @return 
-     */
-    public int error()
+    public void findAllQueens()
     {
         //Loop through board and check each space for a queen
         for (int i = 0; i < board.length; i++)
@@ -43,9 +38,33 @@ public class Fitness {
                //Queen found
                if(board[i][j] == 1)
                {
-                   //Add to list of known queens
+                    //Add to list of known queens
                    int[] queenIndex = {i,j};
                    queenPositions.add(queenIndex);
+               }
+    
+           }
+        }
+    }
+    /**
+     * Evaluates the state of the board and
+     * counts the number of errors.
+     * @return 
+     */
+    public int error(int[][] board)
+    {
+        error = 0;
+        
+        //Loop through board and check each space for a queen
+        for (int i = 0; i < board.length; i++)
+        {
+           for(int j = 0; j < board.length; j++)
+           {
+                  //Queen found
+               if(board[i][j] == 1)
+               {
+                    //Add to list of known queens
+                   int[] queenIndex = {i,j};
                    
                    //Check for other queens in that row
                    if(checkRow(queenIndex))
