@@ -34,7 +34,7 @@ public class Queens {
      */
     public void init()
     {
-        this.n = 16;
+        this.n = 32;
         this.board = new int[n][n];
         this.boardStates = new ArrayList<>();
         this.rand = new Random();
