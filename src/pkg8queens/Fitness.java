@@ -92,12 +92,6 @@ public class Fitness {
                 collision = true;
                 
                 int[] queen = new int[]{rowNum, i};
-                
-                //Check if queen is in list. If not, add it
-                if(!queenPositions.contains(queen))
-                {
-                 queenPositions.add(queen);
-                }
             }
                 
         }
@@ -129,12 +123,6 @@ public class Fitness {
                 collision = true;
                 
                 int[] queen = new int[]{colNum, i};
-                
-                //Check if queen is in list. If not, add it
-                if(!queenPositions.contains(queen))
-                {
-                 queenPositions.add(queen);
-                }
             }
         }
         return collision;
@@ -170,12 +158,6 @@ public class Fitness {
             if(currSpace == 1)
             {
                error++; 
-                
-                //Check if queen is in list. If not, add it
-                if(!queenPositions.contains(nextSpace))
-                {
-                 queenPositions.add(nextSpace);
-                }
             }
             
             x++;
@@ -203,12 +185,6 @@ public class Fitness {
             if(currSpace == 1)
             {
                error++; 
-               
-               //Check if queen is in list. If not, add it
-                if(!queenPositions.contains(nextSpace))
-                {
-                 queenPositions.add(nextSpace);
-                }
             }
             
             x++;
@@ -236,12 +212,6 @@ public class Fitness {
             if(currSpace == 1)
             {
                error++; 
-               
-               //Check if queen is in list. If not, add it
-                if(!queenPositions.contains(nextSpace))
-                {
-                 queenPositions.add(nextSpace);
-                }
             }
             
             x++;
@@ -269,12 +239,6 @@ public class Fitness {
             if(currSpace == 1)
             {
                error++; 
-               
-               //Check if queen is in list. If not, add it
-                if(!queenPositions.contains(nextSpace))
-                {
-                 queenPositions.add(nextSpace);
-                }
             }
             
             x++;
