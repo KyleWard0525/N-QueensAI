@@ -25,6 +25,7 @@ public class Board {
     public Board(int[][] board)
     {
         this.board = board;
+        eval.setBoard(board);
     }
     
     /**
@@ -37,14 +38,15 @@ public class Board {
         {
             System.out.println(Arrays.toString(row));
         }
+        System.out.println("Board error: " + error());
     }
     
     /**
-     * Prints board's error
+     * return board's error
      */
-    public void error()
+    public int error()
     {
-        System.out.println("Board error: " + eval.error(board));
+        return eval.error(board);
     }
     
     /**
@@ -52,7 +54,6 @@ public class Board {
      */
     public void queenLocs()
     {
-        eval.setBoard(board);
         eval.findAllQueens();
         
         //Loop through and print queen locations
