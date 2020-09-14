@@ -20,12 +20,11 @@ public class Fitness {
     private int error;
     private int max;
     
-    public Fitness(int[][] board)
+    public Fitness()
     {
-        this.board = board;
         this.error = 0;
-        this.queenPositions = new ArrayList<>(board.length);
-        this.max = Queens.n-1;
+        this.board = new int[Queens.n][Queens.n];
+        
     }
     
     public void findAllQueens()
@@ -268,6 +267,8 @@ public class Fitness {
     public void setBoard(int[][] b)
     {
         board = b;
+        this.queenPositions = new ArrayList<>(board.length);
+        this.max = Queens.n-1;
     }
     
 }
