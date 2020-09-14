@@ -17,15 +17,16 @@ import java.lang.Math;
 public class Queens {
 
     private int[][] board; //Game Board
-    private ArrayList<int[][]> boardStates; //Holds all generated board states
+    private ArrayList<Board> boardStates; //Holds all generated board states
     private Random rand;
     public static int n; //Game Size
     private Fitness eval; //Evaluates and scores the boards
+    private int max_combs = 16777216; //Maximum possible board states (8 choose 1)^8
+    private ArrayList<Board> neighbors;
 
     public Queens() {
         init();
         initBoard();
-        eval = new Fitness(board);
         generateBoardStates();
     }
 
@@ -35,8 +36,10 @@ public class Queens {
     public void init() {
         this.n = 8;
         this.board = new int[n][n];
-        this.boardStates = new ArrayList<>(16777216);
         this.rand = new Random();
+        boardStates = new ArrayList<>();
+        this.eval = new Fitness();
+        this.neighbors = new ArrayList<>(100);
     }
 
     /**
@@ -44,7 +47,9 @@ public class Queens {
      */
     public void initBoard() {
         int col = 0;
-
+        
+        boardStates.clear();
+        
         //Loop and place queens (1)
         while (col < n) {
             int randRow = rand.nextInt(n);
@@ -56,9 +61,11 @@ public class Queens {
         }
 
         //Add board state to list
-        boardStates.add(board);
-
+        boardStates.add(new Board(board));
+        eval.setBoard(board);
     }
+    
+    
 
     /**
      * Generate all possible board states by moving each columns queen to all
@@ -66,46 +73,55 @@ public class Queens {
      */
     public void generateBoardStates() {
         eval.findAllQueens();
-        ArrayList<int[]> queensPos = Fitness.queenPositions;
         int[][] newBoard = new int[8][8];
-
-        try {
-
-            //Generate all possible board combinations
-            while (!boardStates.contains(newBoard)) {
-                //Loop through all queens
-                for (int i = 0; i < queensPos.size(); i++) {
-                    int[] queen = queensPos.get(i);
-                    for (int k = 0; k < board.length; k++) {
-                        //Pick random row in column to move to
-                        int nextPos = rand.nextInt(n);
-
-                        //Reset if nextPos is off the board
-                        if (nextPos >= board.length) {
-                            nextPos = 0;
-                        }
-
-                        //Move queen
-                        int orig_idx = queen[0];
-                        queen = new int[]{nextPos, queen[1]};
-                        queensPos.set(i, queen);
-
-                        //Change queen's pos on the board
-                        newBoard = board;
-                        newBoard[orig_idx][queen[1]] = 0;
-                        newBoard[nextPos][queen[1]] = 1;
-
-                        //Add new board state to list
-                        boardStates.add(newBoard);
-                    }
-                }
-
-            }
-        } catch (Exception ie) {
-            ie.printStackTrace();
+        int colIdx = 0;
+        int lastQueenIdx = 0;
+        
+        //Copy board to newBoard
+        for(int i = 0; i < board.length; i++)
+        {
+            System.arraycopy(board[i], 0, newBoard[i], 0, board.length);
         }
+        
+        //Loop through all columns
+        while(colIdx < board.length)
+        {
+         //Loop through and clear newBoard's current column
+         for(int i = 0; i < board.length; i++)
+         {
+             newBoard[i][colIdx] = 0;
+        }
+         
+         //Loop through current column
+         for(int i = 0; i < board.length; i++)
+         {
+             //Check if theres a queen there
+             if(board[i][colIdx] == 1)
+             {
+                 
+                 //Save queen index
+                 lastQueenIdx = i;
+                 continue;
+             }
+             //Place queen, save new board state, then reset
+             newBoard[i][colIdx] = 1;
+             boardStates.add(new Board(newBoard));
+             newBoard[i][colIdx] = 0;
+             
+         }
+         //Add position of queen found from board into new board
+         newBoard[lastQueenIdx][colIdx] = 1;
+         
+         
+         
+         //Move to next column
+        colIdx++;
     }
-
+        
+    }
+        /**
+         * Find the board with the lowest error
+         */
     public void findLowestState() {
 
     }
@@ -114,22 +130,49 @@ public class Queens {
      * Prints the board's current state
      */
     public void printState() {
-        System.out.println("Board State: ");
 
-        for (int i = 0; i < n; i++) {
-            System.out.println(Arrays.toString(boardStates.get(0)[i]));
+        
+        System.out.println("Original board : ");
+        boardStates.get(0).print();
+        
+        System.out.println("");
+
+        System.out.println("Number of states: " + boardStates.size());
+        
+        //Print all boards
+        
+        
+        try {
+            for (int j = 0; j < boardStates.size(); j++) {
+                boardStates.get(j).print();
+                Thread.sleep(3000);
+            }
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
         }
+       
+        
 
-        System.out.println("State Error: " + eval.error(boardStates.get(0)));
+        //findLowestState();
+    }
 
-        System.out.println("\nNumber of generated states: " + boardStates.size());
+    // Function to remove duplicates from an ArrayList 
+    public static <T> ArrayList<T> removeDuplicates(ArrayList<T> list) {
 
-        System.out.println("\nBoard State #2:");
+        // Create a new LinkedHashSet 
+        Set<T> set = new LinkedHashSet<>();
 
-        for (int i = 0; i < n; i++) {
-            System.out.println(Arrays.toString(boardStates.get(12)[i]));
-        }
-        System.out.println("State Error: " + eval.error(boardStates.get(12)));
+        // Add the elements to set 
+        set.addAll(list);
 
+        // Clear the list 
+        list.clear();
+
+        // add the elements of set 
+        // with no duplicates to the list 
+        list.addAll(set);
+
+        // return the list 
+        return list;
     }
 }
