@@ -5,8 +5,16 @@
  */
 package pkg8queens;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.lang.Math;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of the Hill-Climbing with random restart algorithm to solve
@@ -22,7 +30,8 @@ public class Queens {
     public static int n; //Game Size
     private Fitness eval; //Evaluates and scores the boards
     private int max_combs = 16777216; //Maximum possible board states (8 choose 1)^8
-    private ArrayList<Board> neighbors;
+    private ArrayList<Integer> boardScores;
+    private int states = 0;
 
     public Queens() {
         init();
@@ -39,7 +48,7 @@ public class Queens {
         this.rand = new Random();
         boardStates = new ArrayList<>();
         this.eval = new Fitness();
-        this.neighbors = new ArrayList<>(100);
+        this.boardScores = new ArrayList<>(100);
     }
 
     /**
@@ -65,6 +74,71 @@ public class Queens {
         eval.setBoard(board);
     }
     
+    /**
+     * 
+     * @param board 
+     */
+    public void writeToFile(int[][] board)
+    {
+       StringBuilder sb = new StringBuilder();
+       
+       for(int i = 0; i < board.length; i++)
+       {
+           for(int j = 0; j < board.length; j++)
+           {
+               sb.append(board[i][j]+"");
+               
+               if(j < board.length - 1)
+               {
+                   sb.append(",");
+               }
+           }
+           sb.append("\n");
+       }
+       try{
+       BufferedWriter writer = new BufferedWriter(new FileWriter("states/board_state_" + states + ".txt"));
+       states++;
+       writer.write(sb.toString());
+       writer.close();
+       }
+       catch(IOException ie)
+       {
+           ie.printStackTrace();
+       }
+    }
+    
+    public void readStates() throws IOException
+    {
+        boardStates.clear();
+        
+        for(int i = 0; i < states; i++)
+        {
+            int[][] newBoard = new int[n][n];
+            
+            try {
+                BufferedReader br = new BufferedReader(new FileReader("states/board_state_" + i + ".txt"));
+                String line = ""; 
+                int rowIdx = 0;
+                
+                while((line = br.readLine()) != null)
+                {
+                    String[] cols = line.split(",");
+                    int colIdx = 0;
+                    
+                    for(String c : cols)
+                    {
+                        newBoard[rowIdx][colIdx] = Integer.parseInt(c);
+                        colIdx++;
+                    }
+                    rowIdx++;
+                }
+                boardStates.add(new Board(newBoard));
+                
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Queens.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
     
 
     /**
@@ -98,13 +172,13 @@ public class Queens {
              //Check if theres a queen there
              if(board[i][colIdx] == 1)
              {
-                 
                  //Save queen index
                  lastQueenIdx = i;
                  continue;
              }
              //Place queen, save new board state, then reset
              newBoard[i][colIdx] = 1;
+             writeToFile(newBoard);
              boardStates.add(new Board(newBoard));
              newBoard[i][colIdx] = 0;
              
@@ -123,7 +197,22 @@ public class Queens {
          * Find the board with the lowest error
          */
     public void findLowestState() {
-
+        //Loop through and score all boards
+        for(Board board : boardStates)
+        {
+            if(eval.error(board.getBoard()) < eval.error(this.board))
+            {
+                boardScores.add(eval.error(board.getBoard()));
+            }
+        }
+        
+        int lowestIdx = boardScores.indexOf(Collections.min(boardScores));
+        
+        Board lowest = boardStates.get(lowestIdx);
+        
+        System.out.println("Lowest board found at index: " + lowestIdx);
+        System.out.println("Number of boards with lower error: " + boardScores.size());
+        lowest.print();
     }
 
     /**
@@ -131,29 +220,19 @@ public class Queens {
      */
     public void printState() {
 
-        
-        System.out.println("Original board : ");
+        try {
+            readStates();
+        } catch (IOException ex) {
+            Logger.getLogger(Queens.class.getName()).log(Level.SEVERE, null, ex);
+        }
         boardStates.get(0).print();
         
         System.out.println("");
-
+        
+        removeDuplicates(boardStates);
         System.out.println("Number of states: " + boardStates.size());
-        
-        //Print all boards
-        
-        
-        try {
-            for (int j = 0; j < boardStates.size(); j++) {
-                boardStates.get(j).print();
-                Thread.sleep(3000);
-            }
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
-        }
-       
-        
 
-        //findLowestState();
+        findLowestState();
     }
 
     // Function to remove duplicates from an ArrayList 
