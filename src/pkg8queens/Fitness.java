@@ -54,6 +54,8 @@ public class Fitness {
     {
         error = 0;
         
+        setBoard(board);
+        
         //Loop through board and check each space for a queen
         for (int i = 0; i < board.length; i++)
         {
