@@ -5,8 +5,12 @@
  */
 package pkg8queens;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Main program driver
+ *
  * @author kward60
  */
 public class Main {
@@ -16,7 +20,8 @@ public class Main {
      */
     public static void main(String[] args) {
         Queens game = new Queens();
+        //game.train();
         game.printState();
+
     }
-    
 }
