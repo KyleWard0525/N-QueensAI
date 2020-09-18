@@ -25,7 +25,6 @@ public class Board {
     public Board(int[][] board)
     {
         this.board = board;
-        eval.setBoard(board);
     }
     
     /**
