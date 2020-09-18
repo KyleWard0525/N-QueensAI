@@ -20,13 +20,13 @@ public class Utils {
      * @param n
      * @return 
      */
-    public long factorial(int n)
+    public static long factorial(int n)
     {
-        if(n <= 2)
+        if(n == 0)
         {
-            return n;
+            return 1;
         }
-        return n * factorial(n);
+        return n * factorial(n-1);
     }
     
     /**
@@ -36,7 +36,7 @@ public class Utils {
      * @param r
      * @return 
      */
-    public long nCr(int n, int r)
+    public static long nCr(int n, int r)
     {
         return (factorial(n) / (factorial(r) * factorial(n-r)));
     }
