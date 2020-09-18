@@ -282,5 +282,16 @@ public class Queens {
         System.out.println("\nSolution Found!");
         System.out.println("Number of switches: " + boardStates.size());
         System.out.println("Resets: " + resets);
+        System.out.println("Total possible combinations: " + computeCombinations());
+    }
+    
+    /**
+     * Returns the total number of possible
+     * combinations for the given search space
+     * as a String
+     */
+    public String computeCombinations()
+    {
+        return String.valueOf(Math.pow(Utils.nCr(n, 1), n));
     }
 }
