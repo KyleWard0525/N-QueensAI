@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package pkg8queens;
 
 import java.io.BufferedReader;
@@ -23,6 +18,8 @@ import java.nio.file.*;
  * Implementation of the Hill-Climbing with random restart algorithm to solve
  * the 8-Queens puzzle
  *
+ * Also includes support to solve N-Queens
+ * 
  * @author kward60
  */
 public class Queens {
@@ -74,7 +71,9 @@ public class Queens {
     }
 
     /**
-     * Generates initial board by placing a queen in a random row of each column
+     * Initialize board by setting all elements
+     * to 0. Also set states and numPrevStates to
+     * 0
      */
     public void initBoard() {
         states = 0;
@@ -87,11 +86,15 @@ public class Queens {
         numPrevStates = 0;
     }
 
+    /**
+     * Randomize the board by placing a
+     * queen in a random row of each column
+     */
     public void randomizeBoard() {
         int col = 0;
         initBoard();
 
-        //Loop and place queens (1)
+        //Loop and place queens
         while (col < n) {
             int randRow = rand.nextInt(n);
 
@@ -114,6 +117,7 @@ public class Queens {
     public void writeToFile(int[][] board) {
         StringBuilder sb = new StringBuilder();
 
+        //Loop through board and append each element to sb
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board.length; j++) {
                 sb.append(board[i][j] + "");
@@ -124,6 +128,7 @@ public class Queens {
             }
             sb.append("\n");
         }
+        //Write board to file
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter("states/board_state_" + states + ".txt"));
             states++;
@@ -148,10 +153,11 @@ public class Queens {
             int[][] newBoard = new int[n][n];
 
             try {
-                BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\user\\Documents\\NetBeansProjects\\8Queens\\states\\board_state_" + i + ".txt"));
+                BufferedReader br = new BufferedReader(new FileReader("states/board_state_" + i + ".txt"));
                 String line = "";
                 int rowIdx = 0;
 
+                //Read in each state line by line
                 while ((line = br.readLine()) != null) {
                     String[] cols = line.split(",");
                     int colIdx = 0;
@@ -163,6 +169,7 @@ public class Queens {
                     rowIdx++;
                 }
                 
+                //If list doesn't contain board, add it
                 if (!boardStates.contains(new Board(newBoard))) {
                     boardStates.add(new Board(newBoard));
                 }
@@ -179,8 +186,7 @@ public class Queens {
      * other rows in that column
      */
     public void generateBoardStates() {
-        eval.findAllQueens();
-        int[][] newBoard = new int[8][8];
+        int[][] newBoard = new int[n][n];
         int colIdx = 0;
         int lastQueenIdx = 0;
 
