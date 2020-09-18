@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package pkg8queens;
 
 import java.util.Arrays;
@@ -15,8 +10,8 @@ import java.util.Arrays;
 public class Board {
     
     private int[][] board;
-    private int size = Queens.n;
-    private Fitness eval = new Fitness();
+    private int size;
+    private Fitness eval;
     
     /**
      * Main constructor
@@ -25,6 +20,8 @@ public class Board {
     public Board(int[][] board)
     {
         this.board = board;
+        this.size = Queens.n;
+        this.eval = new Fitness();
     }
     
     /**
@@ -33,6 +30,8 @@ public class Board {
     public void print()
     {
         System.out.println("\nCurrent State: ");
+        
+        //Print each row of the board
         for(int[] row : board)
         {
             System.out.println(Arrays.toString(row));
@@ -49,20 +48,9 @@ public class Board {
     }
     
     /**
-     * Print locations of all queens
+     * Returns 2D int array of the board
+     * @return 
      */
-    public void queenLocs()
-    {
-        eval.findAllQueens();
-        
-        //Loop through and print queen locations
-        for(int[] queen : Fitness.queenPositions)
-        {
-            System.out.println("Queen found at: " + Arrays.toString(queen));
-        }
-        
-    }
-    
     public int[][] getBoard()
     {
         return board;
