@@ -266,7 +266,7 @@ public class Fitness {
     
     public void setBoard(int[][] b)
     {
-        board = b;
+        this.board = b;
         this.queenPositions = new ArrayList<>(board.length);
         this.max = Queens.n-1;
     }
