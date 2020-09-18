@@ -32,15 +32,29 @@ public class Queens {
     private Random rand;
     public static int n; //Game Size
     private Fitness eval; //Evaluates and scores the boards
-    private int max_combs; //Maximum possible board states (8 choose 1)^8
     private LinkedList<Integer> boardScores;
     private int states;
-    private long del_errors = 0;
     private int numPrevStates;
     private int resets;
-    private int lower;
 
+    /**
+     * Default constructor
+     * 
+     * Sets board to 8x8
+     */
     public Queens() {
+        this.n = 8;
+        init();
+    }
+    
+    /**
+     * Main constructor
+     * Allows for dynamic game sizes
+     * @param size 
+     */
+    public Queens(int size)
+    {
+        this.n = size;
         init();
     }
 
@@ -48,11 +62,8 @@ public class Queens {
      * Initialize game variables
      */
     public void init() {
-        this.n = 8;
         this.states = 0;
         this.resets = 0;
-        this.lower = 0;
-        this.max_combs = 16777216;
         this.numPrevStates = 0;
         this.board = new int[n][n];
         this.rand = new Random();
@@ -74,7 +85,6 @@ public class Queens {
             }
         }
         numPrevStates = 0;
-        lower = 0;
     }
 
     public void randomizeBoard() {
@@ -90,7 +100,6 @@ public class Queens {
 
             col++;
         }
-        //eval.setBoard(board);
 
         //Add board state to list
         boardStates.add(new Board(board));
@@ -98,7 +107,8 @@ public class Queens {
     }
 
     /**
-     *
+     * Write the board state to a file.
+     * 
      * @param board
      */
     public void writeToFile(int[][] board) {
@@ -124,6 +134,12 @@ public class Queens {
         }
     }
 
+    /**
+     * Read the saved board states into the 
+     * boardStates list
+     * 
+     * @throws IOException 
+     */
     public void readStates() throws IOException {
         boardStates.clear();
         boardScores.clear();
@@ -146,43 +162,15 @@ public class Queens {
                     }
                     rowIdx++;
                 }
+                
                 if (!boardStates.contains(new Board(newBoard))) {
                     boardStates.add(new Board(newBoard));
-                }
-
-                if (eval.error(board) > eval.error(newBoard)) {
-                    this.board = newBoard;
-                    lower++;
                 }
 
                 br.close();
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Queens.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
-        //removeDuplicates(boardStates);
-
-    }
-
-    /**
-     * Remove all of the bot_state files from the dataset for the next iteration
-     */
-    public void cleanDataSet() {
-        int dsLength = new File("C:\\Users\\user\\Documents\\NetBeansProjects\\8Queens\\states").list().length;
-        String path = "C:\\Users\\user\\Documents\\NetBeansProjects\\8Queens\\states\\bot_state_";
-
-        for (int i = 0; i < states; i++) {
-
-            //Read in and delete old files
-            File f = new File("C:\\Users\\user\\Documents\\NetBeansProjects\\8Queens\\states\\bot_state_" + i + ".txt");
-            if (f.exists()) {
-                if (f.delete()) {
-                    System.out.println("File deleted!");
-                }
-            } else {
-                del_errors++;
-            }
-
         }
     }
 
@@ -235,7 +223,8 @@ public class Queens {
     }
 
     /**
-     * Find the board with the lowest error
+     * Find the board with the lowest error and sets it as
+     * the current board
      */
     public void moveToLowestState() {
 
@@ -244,20 +233,20 @@ public class Queens {
         }
 
         int lowestErr = Collections.min(boardScores);
-        System.out.println("Lowest error: " + lowestErr);
 
         if (lowestErr < eval.error(board)) {
-            this.board = boardStates.get(boardScores.indexOf(lowestErr)).getBoard();
-            System.out.println("board switched\n");
-
-            for (int[] row : board) {
-                System.out.println(Arrays.toString(row));
-            }
-            System.out.println("Error = " + eval.error(board));
+            Board b = boardStates.get(boardScores.indexOf(lowestErr));
+            b.print();
+            this.board = b.getBoard();
         }
     }
 
-    public void train() throws InterruptedException {
+    /**
+     * Trains the AI until the solution is found
+     * 
+     * @throws InterruptedException 
+     */
+    public void train(){
 
         while (eval.error(board) > 0) {
             try {
@@ -276,58 +265,16 @@ public class Queens {
                 } else {
 
                     numPrevStates = boardStates.size();
-
                     new Board(board).print();
+                    moveToLowestState();
                 }
 
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(Queens.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-    }
-
-    /**
-     * Prints the board's current state
-     */
-    public void printState() {
-
-        System.out.println("");
-
-        for (int i = 0; i < 30; i++) {
-            generateBoardStates();
-
-            try {
-                readStates();
-            } catch (IOException ex) {
-                Logger.getLogger(Queens.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-            if (eval.error(board) == 0) {
-                break;
-            }
-
-            moveToLowestState();
-        }
-        //cleanDataSet();
-    }
-
-    // Function to remove duplicates from an ArrayList 
-    public static <T> LinkedList<T> removeDuplicates(LinkedList<T> list) {
-
-        // Create a new LinkedHashSet 
-        Set<T> set = new LinkedHashSet<>();
-
-        // Add the elements to set 
-        set.addAll(list);
-
-        // Clear the list 
-        list.clear();
-
-        // add the elements of set 
-        // with no duplicates to the list 
-        list.addAll(set);
-
-        // return the list 
-        return list;
+        System.out.println("\nSolution Found!");
+        System.out.println("Number of switches: " + boardStates.size());
+        System.out.println("Resets: " + resets);
     }
 }
