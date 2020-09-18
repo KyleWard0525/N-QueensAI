@@ -7,6 +7,8 @@ package pkg8queens;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -15,6 +17,7 @@ import java.util.*;
 import java.lang.Math;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.nio.file.*;
 
 /**
  * Implementation of the Hill-Climbing with random restart algorithm to solve
@@ -25,18 +28,19 @@ import java.util.logging.Logger;
 public class Queens {
 
     private int[][] board; //Game Board
-    private ArrayList<Board> boardStates; //Holds all generated board states
+    private LinkedList<Board> boardStates; //Holds all generated board states
     private Random rand;
     public static int n; //Game Size
     private Fitness eval; //Evaluates and scores the boards
-    private int max_combs = 16777216; //Maximum possible board states (8 choose 1)^8
-    private ArrayList<Integer> boardScores;
-    private int states = 0;
+    private int max_combs; //Maximum possible board states (8 choose 1)^8
+    private LinkedList<Integer> boardScores;
+    private int states;
+    private long del_errors = 0;
+    private int numPrevStates;
+    private int resets;
 
     public Queens() {
         init();
-        initBoard();
-        generateBoardStates();
     }
 
     /**
@@ -44,20 +48,38 @@ public class Queens {
      */
     public void init() {
         this.n = 8;
+        this.states = 0;
+        this.resets = 0;
+        this.max_combs = 16777216;
+        this.numPrevStates = 0;
         this.board = new int[n][n];
         this.rand = new Random();
-        boardStates = new ArrayList<>();
+        boardStates = new LinkedList<Board>();
         this.eval = new Fitness();
-        this.boardScores = new ArrayList<>(100);
+        this.boardScores = new LinkedList<>();
+        randomizeBoard();
     }
 
     /**
      * Generates initial board by placing a queen in a random row of each column
      */
     public void initBoard() {
-        int col = 0;
+        states = 0;
         
-        boardStates.clear();
+        for(int i = 0; i < n; i++)
+        {
+            for(int j = 0; j < n; j++)
+            {
+                board[i][j] = 0;
+            }
+        }
+        numPrevStates = 0;
+    }
+    
+    public void randomizeBoard()
+    {
+        int col = 0;
+        initBoard();
         
         //Loop and place queens (1)
         while (col < n) {
@@ -68,10 +90,11 @@ public class Queens {
 
             col++;
         }
-
+        eval.setBoard(board);
+        
         //Add board state to list
         boardStates.add(new Board(board));
-        eval.setBoard(board);
+        boardStates.get(boardStates.size()-1).print();
     }
     
     /**
@@ -110,13 +133,14 @@ public class Queens {
     public void readStates() throws IOException
     {
         boardStates.clear();
+        boardScores.clear();
         
-        for(int i = 0; i < states; i++)
+        for(int i = 0; i < states-1; i++)
         {
             int[][] newBoard = new int[n][n];
             
             try {
-                BufferedReader br = new BufferedReader(new FileReader("states/board_state_" + i + ".txt"));
+                BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\user\\Documents\\NetBeansProjects\\8Queens\\states\\board_state_" + i + ".txt"));
                 String line = ""; 
                 int rowIdx = 0;
                 
@@ -132,14 +156,65 @@ public class Queens {
                     }
                     rowIdx++;
                 }
-                boardStates.add(new Board(newBoard));
+                if(!boardStates.contains(new Board(newBoard)))
+                {
+                   boardStates.add(new Board(newBoard)); 
+                }
                 
+                if(eval.error(board) > eval.error(newBoard))
+                {
+                    this.board = newBoard;
+                }
+                
+                 br.close();
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Queens.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        removeDuplicates(boardStates);
+        
+     
+        
+        //Loop through and score all boards
+        for(Board board : boardStates)
+        {
+            if(eval.error(this.board) > eval.error(board.getBoard()))
+            {
+                boardScores.add(eval.error(board.getBoard()));
+            }
+            
+        }
+        
     }
     
+    /**
+     * Remove all of the bot_state files from the
+     * dataset for the next iteration
+     */
+    public void cleanDataSet()
+    {
+        int dsLength = new File("C:\\Users\\user\\Documents\\NetBeansProjects\\8Queens\\states").list().length;
+        String path = "C:\\Users\\user\\Documents\\NetBeansProjects\\8Queens\\states\\bot_state_";
+        
+        for(int i = 0; i < states; i++)
+        {
+            
+            //Read in and delete old files
+            File f = new File("C:\\Users\\user\\Documents\\NetBeansProjects\\8Queens\\states\\bot_state_" + i + ".txt");
+            if(f.exists())
+            {
+                if(f.delete())
+                {
+                System.out.println("File deleted!");
+                }
+            }
+            else{
+                del_errors++;
+            }
+            
+            
+        }
+    }
 
     /**
      * Generate all possible board states by moving each columns queen to all
@@ -178,8 +253,12 @@ public class Queens {
              }
              //Place queen, save new board state, then reset
              newBoard[i][colIdx] = 1;
-             writeToFile(newBoard);
-             boardStates.add(new Board(newBoard));
+             
+             if(eval.error(board) > eval.error(newBoard))
+             {
+                 writeToFile(newBoard);
+             }
+             
              newBoard[i][colIdx] = 0;
              
          }
@@ -191,52 +270,95 @@ public class Queens {
          //Move to next column
         colIdx++;
     }
-        
     }
         /**
          * Find the board with the lowest error
          */
-    public void findLowestState() {
-        //Loop through and score all boards
-        for(Board board : boardStates)
+    public void moveToLowestState() {
+        
+        
+        //removeDuplicates(boardScores);
+        //Collections.sort(boardScores);
+        //System.out.println("Lowest board score " + boardScores.get(0));
+        
+        //No neighbors found
+        if(boardStates.size() < 1)
         {
-            if(eval.error(board.getBoard()) < eval.error(this.board))
-            {
-                boardScores.add(eval.error(board.getBoard()));
-            }
+            //Reset board
+            System.out.println("No neighbors found, resetting board!\n");
+            randomizeBoard();
+        }
+    }
+    
+    public void train() throws InterruptedException
+    {
+        try {
+            readStates();
+        } catch (IOException ex) {
+            Logger.getLogger(Queens.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        int lowestIdx = boardScores.indexOf(Collections.min(boardScores));
-        
-        Board lowest = boardStates.get(lowestIdx);
-        
-        System.out.println("Lowest board found at index: " + lowestIdx);
-        System.out.println("Number of boards with lower error: " + boardScores.size());
-        lowest.print();
+        while (eval.error(board) > 0)
+        {
+            try {
+                //moveToLowestState();
+                generateBoardStates();
+                readStates();
+                cleanDataSet();
+                //System.out.println("Failed deletes: " + del_errors);
+                //Thread.sleep(100);
+            } catch (IOException ex) {
+                Logger.getLogger(Queens.class.getName()).log(Level.SEVERE, null, ex);
+            } catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
      * Prints the board's current state
      */
     public void printState() {
-
+        
+        System.out.println("");
+        
+        for(int i = 0; i < 10; i++)
+        {
+        generateBoardStates();
+        
         try {
             readStates();
         } catch (IOException ex) {
             Logger.getLogger(Queens.class.getName()).log(Level.SEVERE, null, ex);
         }
-        boardStates.get(0).print();
         
-        System.out.println("");
+        int numLower = boardStates.size()-numPrevStates;
+        System.out.println("\nNumber of states with lower h: " + numLower);
         
-        removeDuplicates(boardStates);
-        System.out.println("Number of states: " + boardStates.size());
-
-        findLowestState();
+        if(numLower < 1)
+        {
+           //Reset board
+           System.out.println("No neighbors found, resetting board!");
+           randomizeBoard(); 
+           numPrevStates = 0;
+           resets++;
+           continue;
+        }
+        else{
+        //moveToLowestState();
+        numPrevStates = boardStates.size();
+        
+        
+        new Board(board).print();
+        }
+        cleanDataSet();
+        }
+        
     }
 
     // Function to remove duplicates from an ArrayList 
-    public static <T> ArrayList<T> removeDuplicates(ArrayList<T> list) {
+    public static <T> LinkedList<T> removeDuplicates(LinkedList<T> list) {
 
         // Create a new LinkedHashSet 
         Set<T> set = new LinkedHashSet<>();
