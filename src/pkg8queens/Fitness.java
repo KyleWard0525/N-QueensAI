@@ -1,11 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package pkg8queens;
-
-import java.util.*;
 
 /**
  * Used to evaluate and score the state of 
@@ -15,36 +8,19 @@ import java.util.*;
  */
 public class Fitness {
     
-    public static ArrayList<int[]> queenPositions; //Keeps track of where each queen is
     private int[][] board;
     private int error;
     private int max;
     
+    /**
+     * Main constructor
+     */
     public Fitness()
     {
         this.error = 0;
-        this.board = new int[Queens.n][Queens.n];
-        
+        this.board = new int[Queens.n][Queens.n]; 
     }
     
-    public void findAllQueens()
-    {
-        //Loop through board and check each space for a queen
-        for (int i = 0; i < board.length; i++)
-        {
-           for(int j = 0; j < board.length; j++)
-           {
-               //Queen found
-               if(board[i][j] == 1)
-               {
-                    //Add to list of known queens
-                   int[] queenIndex = {i,j};
-                   queenPositions.add(queenIndex);
-               }
-    
-           }
-        }
-    }
     /**
      * Evaluates the state of the board and
      * counts the number of errors.
@@ -266,10 +242,13 @@ public class Fitness {
         }
     }
     
+    /**
+     * Set the current board to be evaluated
+     * @param b 
+     */
     public void setBoard(int[][] b)
     {
         this.board = b;
-        this.queenPositions = new ArrayList<>(board.length);
         this.max = Queens.n-1;
     }
     
