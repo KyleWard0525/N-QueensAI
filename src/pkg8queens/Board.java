@@ -33,7 +33,7 @@ public class Board {
      */
     public void print()
     {
-        System.out.println("\nBoard: ");
+        System.out.println("\nCurrent State: ");
         for(int[] row : board)
         {
             System.out.println(Arrays.toString(row));
