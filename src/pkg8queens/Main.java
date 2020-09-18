@@ -20,8 +20,6 @@ public class Main {
      */
     public static void main(String[] args) {
         Queens game = new Queens();
-        //game.train();
-        game.printState();
-
+        game.train();
     }
 }
