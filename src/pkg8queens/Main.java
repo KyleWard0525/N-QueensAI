@@ -11,7 +11,7 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Queens game = new Queens();
+        Queens game = new Queens(20);
         game.train();
     }
 }
